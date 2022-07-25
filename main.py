@@ -120,17 +120,6 @@ def file_processing(i, files_list):
                 dict_rows_key = {rows[0]: rows[9] for rows in csv_file}
     return dict_rows_key
 
-    # if files_check:
-    #     filepaths = [os.path.join(files_path, name) for name in os.listdir(files_path)]
-    #     for i in files_list:
-    #         if i in filepaths:
-    #             with open(i) as f:
-    #                 cvs_file = reader(f)
-    #                 # next is used here to ignore the first lines of files which contains column names
-    #                 next(cvs_file)
-    #                 dict_rows_key = {rows[0]: rows[index] for rows in cvs_file}
-
-
 
 
 def file_parsing(year, month_name):
