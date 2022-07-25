@@ -1,91 +1,29 @@
-import math
+import sys
+from csv import reader
+import datetime
+from math import ceil
 import os
-import csv
-import statistics
+from statistics import mean
 
 
-def main():
+def main(argv):
     months = [" ", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    time = input("Enter the time you want to get files: ")
-    if "/" in time:
-        year = time.split("/")[0]
-        month = time.split("/")[1:]
-        month = int(month[0])
+    date = argv
+    if "/" in date:
+        year_month = datetime.datetime.strptime(date, "%Y/%m")
+        year = str(year_month.year)
+        month = year_month.month
         month_name = months[month]
-        monthly_files(year, month_name)
+        file_parsing(year, month_name)
     else:
-        year = time
-        month_name = "."
-        file_processing(month_name, year)
+        date = argv
+        year_month = datetime.datetime.strptime(date, "%Y")
+        year = str(year_month.year)
+        month = year
+        file_parsing(year, month)
 
 
-def monthly_files(year, month_name):
-    files_path = r"/home/hamza/Downloads/weatherfiles/weatherfiles/"
-    filepaths = [os.path.join(files_path, name) for name in os.listdir(files_path)]
-    for path in filepaths:
-        if month_name in path:
-            if year in path:
-                with open(path) as f:
-                    cvs_file = csv.reader(f)
-                    next(cvs_file)
-                    dict_from_csv1 = {rows[0]: rows[3] for rows in cvs_file}
-                    # for key, value in dict_from_csv1.items():
-                    #     print([key, value])
-    for path in filepaths:
-        if month_name in path:
-            if year in path:
-                with open(path) as f:
-                    cvs_file = csv.reader(f)
-                    next(cvs_file)
-                    dict_from_csv = {rows[0]: rows[1] for rows in cvs_file}
-
-    for path in filepaths:
-        if month_name in path:
-            if year in path:
-                with open(path) as f:
-                    cvs_file = csv.reader(f)
-                    next(cvs_file)
-                    dict_from_csv2 = {rows[0]: rows[9] for rows in cvs_file}
-    # print(month_name+" "+year)
-    average_values(dict_from_csv, dict_from_csv1, dict_from_csv2, month_name, year)
-
-
-def average_values(dict, dict1, dict2, month, year):
-    # res = sum((len(val) for val in dict.values()))
-    # print(res)
-    # dict[key] = [int(elt) for elt in row[1:] if elt.isdigit()]
-    month = month
-    year = year
-    new_values = [list for key, list in dict.items()]
-    for i in range(0, len(new_values)):
-        new_values[i] = int(new_values[i])
-    first_highest_temprature = max(new_values)
-    second_highest_temprature = max(filter(lambda score: score != first_highest_temprature, new_values))
-
-    new_values1 = [list for key, list in dict1.items()]
-    for i in range(0, len(new_values1)):
-        new_values1[i] = int(new_values1[i])
-
-    first_lowest_temprature = min(new_values1)
-    second_lowest_temprature = max(filter(lambda score: score != first_lowest_temprature, new_values1))
-
-    new_values2 = [list for key, list in dict2.items()]
-    for i in range(0, len(new_values2)):
-        new_values2[i] = int(new_values2[i])
-
-    print("Highest Average: " + str(math.ceil(statistics.mean(new_values))) + "C")
-    print("Lowest Average: " + str(math.ceil(statistics.mean(new_values1))) + "C")
-    print("Average Mean Humidity: " + str(math.ceil(statistics.mean(new_values2))) + "%")
-
-    first_second(first_highest_temprature, second_highest_temprature, first_lowest_temprature,
-                 second_lowest_temprature, month, year)
-
-    # x = type(dict["2009-9-1"][0])
-
-    # print(list)
-
-
-def first_second(maxT, secondmaxT, minT, secondminT, month, year):
+def first_second_low_high_temprature(maxT, secondmaxT, minT, secondminT, month, year):
     print(" ")
 
     print(month + " " + year)
@@ -111,92 +49,117 @@ def first_second(maxT, secondmaxT, minT, secondminT, month, year):
     print(" " + str(secondminT) + "C")
 
 
-def max_temprature(dict):
-    temp = max(dict.values())
+def monthly_average_values(dict, dict1, dict2, year, month):
+    month = month
+    year = year
+    new_values = [list for key, list in dict.items()]
+    for i in range(0, len(new_values)):
+        new_values[i] = int(new_values[i])
+    new_values.sort()
+    first_highest_temprature = new_values[-1]
+    second_highest_temprature = new_values[-2]
 
-    key_list = list(dict.keys())
-    val_list = list(dict.values())
+    new_values1 = [list for key, list in dict1.items()]
+    for i in range(0, len(new_values1)):
+        new_values1[i] = int(new_values1[i])
 
-    # print key with val 100
-    position = val_list.index(temp)
-    print("Highest " + temp + "C on " + key_list[position])
-    # return temp
+    new_values1.sort(reverse=True)
+    first_lowest_temprature = new_values1[-1]
+    second_lowest_temprature = new_values1[-2]
 
+    new_values2 = [list for key, list in dict2.items()]
+    for i in range(0, len(new_values2)):
+        new_values2[i] = int(new_values2[i])
 
-def min_temprature(dict):
-    # print(dict1)
-    temp = min(filter(None, dict.values()))
-    key_list = list(dict.keys())
-    val_list = list(dict.values())
+    print("Highest Average: " + str(ceil(mean(new_values))) + "C")
+    print("Lowest Average: " + str(ceil(mean(new_values1))) + "C")
+    print("Average Mean Humidity: " + str(ceil(mean(new_values2))) + "%")
 
-    # print key with val temp
-    position = val_list.index(temp)
-    print("Minimum " + temp + "C on " + key_list[position])
-
-
-def max_humidity(dict):
-    temp = max(dict.values())
-    key_list = list(dict.keys())
-    val_list = list(dict.values())
-
-    # print key with val temp
-    position = val_list.index(temp)
-    print("Maximum " + temp + "% on " + key_list[position])
+    first_second_low_high_temprature(first_highest_temprature,
+                                     second_highest_temprature, first_lowest_temprature,
+                                     second_lowest_temprature, month, year)
 
 
-def first_second_temprature(dict):
-    temp = max(dict.values())
-    key_list = list(dict.keys())
-    val_list = list(dict.values())
+def yearly_values(dict1, dict2, dict3):
+    max_temprature = max(dict1.values())
+    key_list = list(dict1.keys())
+    val_list = list(dict1.values())
 
     # print key with val temp
-    position = val_list.index(temp)
-    print(key_list[position])
-    for i in range(temp):
-        print("+")
-    print(temp)
+    position = val_list.index(max_temprature)
+    print("Highest: " + max_temprature + "C on " + key_list[position])
+
+    min_temprature = max(dict2.values())
+    key_list = list(dict2.keys())
+    val_list = list(dict2.values())
+
+    # print key with val temp
+    position = val_list.index(min_temprature)
+    print("Lowest: " + min_temprature + "C on " + key_list[position])
+
+    max_humidity = max(dict1.values())
+    key_list = list(dict1.keys())
+    val_list = list(dict1.values())
+
+    # print key with val temp
+    position = val_list.index(max_humidity)
+    print("Humidity: " + max_humidity + "% on " + key_list[position])
 
 
-def file_processing(month_name, year):
-    files_path = r"/home/hamza/Downloads/weatherfiles/weatherfiles/"
+def file_processing(i, files_list):
+    index = i
+    files_list = files_list
+    files_path = "/home/hamza/Downloads/weatherfiles/weatherfiles/"
     filepaths = [os.path.join(files_path, name) for name in os.listdir(files_path)]
-    for path in filepaths:
-        if month_name in path:
-            if year in path:
-                with open(path) as f:
-                    cvs_file = csv.reader(f)
-                    next(cvs_file)
-                    dict_from_csv1 = {rows[0]: rows[3] for rows in cvs_file}
-                    # for key, value in dict_from_csv1.items():
-                    #     print([key, value])
-    for path in filepaths:
-        if month_name in path:
-            if year in path:
-                with open(path) as f:
-                    cvs_file = csv.reader(f)
-                    next(cvs_file)
-                    dict_from_csv = {rows[0]: rows[1] for rows in cvs_file}
+    print(files_path)
+    for i in files_list:
+        if i in files_list:
+            with open(i) as f:
+                csv_file = reader(f)
+                next(csv_file)
+                dict_rows_key = {rows[0]: rows[9] for rows in csv_file}
+    return dict_rows_key
 
-    for path in filepaths:
-        if month_name in path:
-            if year in path:
-                with open(path) as f:
-                    cvs_file = csv.reader(f)
-                    next(cvs_file)
-                    dict_from_csv2 = {rows[0]: rows[9] for rows in cvs_file}
-    max_temprature(dict_from_csv)
-    min_temprature(dict_from_csv1)
-    max_humidity(dict_from_csv2)
-
-    # for key, value in dict_from_csv.items():
-    #     fin_max = max(dict_from_csv, key=dict_from_csv.get)
-    # print("Maximum value:", fin_max)
-
-    # for line in cvsFile:
-    #      print(line)
-    # for key, value in mydict.items():
-    #     writer.writerow([key, value])
+    # if files_check:
+    #     filepaths = [os.path.join(files_path, name) for name in os.listdir(files_path)]
+    #     for i in files_list:
+    #         if i in filepaths:
+    #             with open(i) as f:
+    #                 cvs_file = reader(f)
+    #                 # next is used here to ignore the first lines of files which contains column names
+    #                 next(cvs_file)
+    #                 dict_rows_key = {rows[0]: rows[index] for rows in cvs_file}
 
 
-if __name__ == '__main__':
-    main()
+
+
+def file_parsing(year, month_name):
+    year = year
+    month = month_name
+    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    files_list = [None] * 12
+    j = 0
+    if month_name == year:
+        list_length = len(files_list)
+
+        for i in range(list_length):
+            files_list[i] = ("Murree_weather_" + year + "_" + months[j] + ".txt")
+            j = j + 1
+
+    else:
+        files_list[0] = "Murree_weather_" + year + "_" + months[j] + ".txt"
+    dict_max_temprature = file_processing(1, files_list)
+    dict_min_temprature = file_processing(3, files_list)
+    dict_humidity = file_processing(9, files_list)
+    if year != month_name:
+        monthly_average_values(dict_max_temprature, dict_min_temprature,
+                               dict_humidity, year, month_name)
+
+    else:
+        yearly_values(dict_max_temprature, dict_min_temprature, dict_humidity)
+
+
+if __name__ != '__main__':
+    pass
+else:
+    main(sys.argv[1])
