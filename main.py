@@ -8,19 +8,53 @@ from statistics import mean
 
 def main(argv):
     months = [" ", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    date = argv
-    if "/" in date:
+
+    length = len(sys.argv)
+    option = sys.argv[length - 2]
+    date = sys.argv[length - 1]
+    print(date)
+    if option == "-e":
+
+        date = sys.argv[length - 1]
+        year_month = datetime.datetime.strptime(date, "%Y")
+        year = str(year_month.year)
+        month = year
+        file_parsing(year, month, option)
+
+    elif option == "-a":
         year_month = datetime.datetime.strptime(date, "%Y/%m")
         year = str(year_month.year)
         month = year_month.month
         month_name = months[month]
-        file_parsing(year, month_name)
-    else:
-        date = argv
-        year_month = datetime.datetime.strptime(date, "%Y")
+        file_parsing(year, month_name, option)
+
+    elif option == "-c":
+
+        year_month = datetime.datetime.strptime(date, "%Y/%m")
         year = str(year_month.year)
-        month = year
-        file_parsing(year, month)
+        month = year_month.month
+        month_name = months[month]
+        file_parsing(year, month_name, option)
+
+
+def get_first_second_temprature(dict1, dict2, month, year):
+    new_values = [list for key, list in dict1.items()]
+    for i in range(0, len(new_values)):
+        new_values[i] = int(new_values[i])
+    new_values.sort()
+    first_highest_temprature = new_values[-1]
+    second_highest_temprature = new_values[-2]
+
+    new_values1 = [list for key, list in dict2.items()]
+    for i in range(0, len(new_values1)):
+        new_values1[i] = int(new_values1[i])
+
+    new_values1.sort(reverse=True)
+    first_lowest_temprature = new_values1[-1]
+    second_lowest_temprature = new_values1[-2]
+
+    first_second_low_high_temprature(first_highest_temprature, second_highest_temprature,
+                                     first_lowest_temprature, second_lowest_temprature, month, year)
 
 
 def first_second_low_high_temprature(maxT, secondmaxT, minT, secondminT, month, year):
@@ -49,23 +83,14 @@ def first_second_low_high_temprature(maxT, secondmaxT, minT, secondminT, month, 
     print(" " + str(secondminT) + "C")
 
 
-def monthly_average_values(dict, dict1, dict2, year, month):
-    month = month
-    year = year
+def monthly_average_values(dict, dict1, dict2, ):
     new_values = [list for key, list in dict.items()]
     for i in range(0, len(new_values)):
         new_values[i] = int(new_values[i])
-    new_values.sort()
-    first_highest_temprature = new_values[-1]
-    second_highest_temprature = new_values[-2]
 
     new_values1 = [list for key, list in dict1.items()]
     for i in range(0, len(new_values1)):
         new_values1[i] = int(new_values1[i])
-
-    new_values1.sort(reverse=True)
-    first_lowest_temprature = new_values1[-1]
-    second_lowest_temprature = new_values1[-2]
 
     new_values2 = [list for key, list in dict2.items()]
     for i in range(0, len(new_values2)):
@@ -74,10 +99,6 @@ def monthly_average_values(dict, dict1, dict2, year, month):
     print("Highest Average: " + str(ceil(mean(new_values))) + "C")
     print("Lowest Average: " + str(ceil(mean(new_values1))) + "C")
     print("Average Mean Humidity: " + str(ceil(mean(new_values2))) + "%")
-
-    first_second_low_high_temprature(first_highest_temprature,
-                                     second_highest_temprature, first_lowest_temprature,
-                                     second_lowest_temprature, month, year)
 
 
 def yearly_values(dict1, dict2, dict3):
@@ -121,14 +142,13 @@ def file_processing(i, files_list):
     return dict_rows_key
 
 
-
-def file_parsing(year, month_name):
+def file_parsing(year, month_name, option):
     year = year
     month = month_name
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     files_list = [None] * 12
     j = 0
-    if month_name == year:
+    if option == "-e":
         list_length = len(files_list)
 
         for i in range(list_length):
@@ -142,10 +162,12 @@ def file_parsing(year, month_name):
     dict_humidity = file_processing(9, files_list)
     if year != month_name:
         monthly_average_values(dict_max_temprature, dict_min_temprature,
-                               dict_humidity, year, month_name)
+                               dict_humidity)
 
-    else:
+    elif option == "-a":
         yearly_values(dict_max_temprature, dict_min_temprature, dict_humidity)
+    elif option == "-c":
+        get_first_second_temprature(dict_max_temprature, dict_min_temprature, month, year)
 
 
 if __name__ != '__main__':
